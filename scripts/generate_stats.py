@@ -14,8 +14,11 @@ from pathlib import Path
 from typing import Any
 
 
+import render_card
+
 GRAPHQL_URL = "https://api.github.com/graphql"
 CONFIG_PATH = Path("config.json")
+RENDERER_PATH = Path(__file__).with_name("render_card.py")
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "username": "",
@@ -775,6 +778,64 @@ def calculate_streaks(
     )
 
 
+def _day_counts(
+    contribution_days: list[dict[str, Any]],
+) -> dict[date, int]:
+    return {
+        datetime.strptime(
+            item["date"], "%Y-%m-%d"
+        ).date(): int(item["contributionCount"])
+        for item in contribution_days
+    }
+
+
+def recent_days(
+    contribution_days: list[dict[str, Any]],
+    today: date,
+) -> list[list[Any]]:
+    """The last 53 full weeks, Sunday aligned, as [iso_date, count]."""
+    counts = _day_counts(contribution_days)
+    end = today
+    start = end - timedelta(days=52 * 7 + (end.weekday() + 1) % 7)
+    days = []
+    cursor = start
+    while cursor <= end:
+        days.append([cursor.isoformat(), counts.get(cursor, 0)])
+        cursor += timedelta(days=1)
+    return days
+
+
+def streak_ranges(
+    contribution_days: list[dict[str, Any]],
+    today: date,
+) -> dict[str, list[str] | None]:
+    counts = _day_counts(contribution_days)
+    longest: list[str] | None = None
+    best = 0
+    run_start: date | None = None
+    for current in sorted(counts):
+        if counts[current] > 0:
+            if run_start is None:
+                run_start = current
+            length = (current - run_start).days + 1
+            if length > best:
+                best = length
+                longest = [run_start.isoformat(), current.isoformat()]
+        else:
+            run_start = None
+
+    cursor = today if counts.get(today, 0) > 0 else today - timedelta(days=1)
+    current_end = cursor
+    while counts.get(cursor, 0) > 0:
+        cursor -= timedelta(days=1)
+    current_range = (
+        [(cursor + timedelta(days=1)).isoformat(), current_end.isoformat()]
+        if current_end != cursor
+        else None
+    )
+    return {"current": current_range, "longest": longest}
+
+
 def collect_languages(
     repositories: list[
         dict[str, Any]
@@ -1020,6 +1081,13 @@ def fetch_stats(
     theme = config["theme"]
 
     return {
+        "first_year": years[0],
+        "days": recent_days(
+            all_days, now.date()
+        ),
+        "streak_ranges": streak_ranges(
+            all_days, now.date()
+        ),
         "total_stars": total_stars,
         "total_commits": total_commits,
         "total_prs": int(
@@ -1238,6 +1306,7 @@ def build_fingerprint(
 ) -> str:
     generator_hash = hashlib.sha256(
         Path(__file__).read_bytes()
+        + RENDERER_PATH.read_bytes()
     ).hexdigest()
 
     payload = {
@@ -1724,7 +1793,7 @@ def main() -> int:
         )
 
         output_path.write_text(
-            build_svg(
+            render_card.build_svg(
                 username,
                 stats,
                 config,

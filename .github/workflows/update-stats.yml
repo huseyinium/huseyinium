@@ -11,7 +11,7 @@ on:
       - main
     paths:
       - "config.json"
-      - "scripts/generate_stats.py"
+      - "scripts/**"
       - ".github/workflows/update-stats.yml"
 
 permissions:
