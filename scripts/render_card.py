@@ -22,14 +22,14 @@ FONT = (
 )
 MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
 
-BG = "#0a0d14"
-TILE = "#0f141d"
-LINE = "#1c2330"
-TEXT = "#f0f3f8"
-MUTED = "#8b95a7"
-DIM = "#5b6474"
-HEAT = ["#151b26", "#4a1e18", "#8f2a1c", "#e2431f", "#ff9a5a"]
-BRAND = ["#ff8a3d", "#ec3b21", "#d9327c", "#8b5cf6"]
+BG = "#0d1117"
+TILE = "#111620"
+LINE = "#21262d"
+TEXT = "#e6edf3"
+MUTED = "#8b949e"
+DIM = "#6e7681"
+ACCENT = "#f0643c"
+HEAT = ["#161b22", "#3b2520", "#6a3424", "#a8462b", "#f0643c"]
 
 
 def esc(value: Any) -> str:
@@ -70,28 +70,9 @@ def _levels(days: list[list[Any]]) -> list[int]:
 
 
 def _defs() -> str:
-    stops = "".join(
-        f'<stop offset="{i / (len(BRAND) - 1):.2f}" stop-color="{c}"/>'
-        for i, c in enumerate(BRAND)
-    )
     return f"""
   <defs>
-    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">{stops}</linearGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
-      {stops}
-      <animateTransform attributeName="gradientTransform" type="rotate"
-        values="0 .5 .5;360 .5 .5" dur="12s" repeatCount="indefinite"/>
-    </linearGradient>
-    <radialGradient id="glowA" cx="0" cy="0" r="1">
-      <stop offset="0" stop-color="#ec3b21" stop-opacity=".20"/>
-      <stop offset="1" stop-color="#ec3b21" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glowB" cx="1" cy="1" r="1">
-      <stop offset="0" stop-color="#8b5cf6" stop-opacity=".16"/>
-      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
-    </radialGradient>
-    <clipPath id="card"><rect width="{W}" height="{H}" rx="20"/></clipPath>
-    <clipPath id="bar"><rect x="{P}" y="452" width="{INNER}" height="10" rx="5"/></clipPath>
+    <clipPath id="bar"><rect x="{P}" y="452" width="{INNER}" height="8" rx="4"/></clipPath>
   </defs>"""
 
 
@@ -99,24 +80,13 @@ def _style() -> str:
     return f"""
   <style>
     text {{ font-family: {FONT}; }}
-    .label {{ font-size: 11px; font-weight: 700; letter-spacing: 1.6px; fill: {MUTED}; }}
-    .value {{ font-size: 38px; font-weight: 800; font-variant-numeric: tabular-nums; }}
-    .unit {{ font-size: 15px; font-weight: 600; fill: {MUTED}; }}
+    .label {{ font-size: 11px; font-weight: 600; letter-spacing: 1.2px; fill: {MUTED}; }}
+    .value {{ font-size: 34px; font-weight: 700; fill: {TEXT}; font-variant-numeric: tabular-nums; }}
+    .unit {{ font-size: 14px; font-weight: 500; fill: {MUTED}; }}
     .sub {{ font-size: 12px; fill: {DIM}; }}
-    .lang {{ font-size: 13px; fill: {TEXT}; font-weight: 600; }}
-    .pct {{ font-size: 13px; fill: {MUTED}; font-family: {MONO}; }}
+    .lang {{ font-size: 13px; fill: {TEXT}; font-weight: 500; }}
+    .pct {{ font-size: 12px; fill: {MUTED}; font-family: {MONO}; }}
     .mono {{ font-family: {MONO}; }}
-    .rise {{ animation: rise .8s cubic-bezier(.2,.7,.2,1) backwards; }}
-    .pop {{ animation: pop .5s ease-out backwards; }}
-    .grow {{ transform-origin: {P}px 0; animation: grow 1.4s cubic-bezier(.2,.7,.2,1) .9s backwards; }}
-    .pulse {{ transform-box: fill-box; transform-origin: center; animation: pulse 2s ease-out infinite; }}
-    @keyframes rise {{ from {{ opacity: 0; transform: translateY(10px); }} }}
-    @keyframes pop {{ from {{ opacity: 0; }} }}
-    @keyframes grow {{ from {{ transform: scaleX(0); }} }}
-    @keyframes pulse {{ 0% {{ transform: scale(1); opacity: .7; }} 100% {{ transform: scale(3); opacity: 0; }} }}
-    @media (prefers-reduced-motion: reduce) {{
-      .rise, .pop, .grow, .pulse {{ animation: none; }}
-    }}
   </style>"""
 
 
@@ -136,21 +106,16 @@ def _tile(
     dot = ""
     label_x = x + 20
     if live:
-        cx, cy = x + 24, y + 27
-        dot = (
-            f'<circle class="pulse" cx="{cx}" cy="{cy}" r="3.5" fill="#ff8a3d"/>'
-            f'<circle cx="{cx}" cy="{cy}" r="3.5" fill="#ff8a3d"/>'
-        )
-        label_x = x + 36
+        dot = f'<circle cx="{x + 23.5}" cy="{y + 27}" r="3.5" fill="{ACCENT}"/>'
+        label_x = x + 34
     unit_part = f'<tspan class="unit" dx="6">{esc(unit)}</tspan>' if unit else ""
     return f"""
-    <g class="rise" style="animation-delay:{0.1 + index * 0.12:.2f}s">
-      <rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="14" fill="{TILE}" stroke="{LINE}"/>
-      <rect x="{x + 20:.1f}" y="{y}" width="{w - 40:.1f}" height="2" rx="1" fill="url(#brand)" opacity=".9"/>
+    <g>
+      <rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="12" fill="{TILE}" stroke="{LINE}"/>
       {dot}
       <text x="{label_x:.1f}" y="{y + 31}" class="label">{esc(label)}</text>
-      <text x="{x + 20:.1f}" y="{y + 78}" class="value" fill="url(#brand)">{esc(value)}{unit_part}</text>
-      <text x="{x + 20:.1f}" y="{y + 100}" class="sub">{esc(sub)}</text>
+      <text x="{x + 20:.1f}" y="{y + 76}" class="value">{esc(value)}{unit_part}</text>
+      <text x="{x + 20:.1f}" y="{y + 98}" class="sub">{esc(sub)}</text>
     </g>"""
 
 
@@ -179,14 +144,8 @@ def _heatmap(days: list[list[Any]], today: date) -> str:
                     f'<text x="{x:.1f}" y="{top - 10}" class="sub">{d.strftime("%b")}</text>'
                 )
             last_month = d.month
-        if d == today:
-            columns[col].append(
-                f'<rect class="pulse" x="{x:.1f}" y="{y:.1f}" width="{cell}" height="{cell}" '
-                f'rx="3.5" fill="none" stroke="#ff9a5a" stroke-width="1.5"/>'
-            )
     cols = "".join(
-        f'<g class="pop" style="animation-delay:{0.5 + col * 0.018:.3f}s">{"".join(rects)}</g>'
-        for col, rects in sorted(columns.items())
+        "".join(rects) for _, rects in sorted(columns.items())
     )
 
     active = sum(1 for _, c in days if c > 0)
@@ -219,7 +178,7 @@ def _languages(languages: list[dict[str, Any]]) -> str:
     for lang in languages:
         width = INNER * lang["percentage"] / 100
         segments.append(
-            f'<rect x="{x:.2f}" y="452" width="{max(width, 0):.2f}" height="10" fill="{esc(lang["color"])}"/>'
+            f'<rect x="{x:.2f}" y="452" width="{max(width, 0):.2f}" height="8" fill="{esc(lang["color"])}"/>'
         )
         x += width
     legend = []
@@ -228,8 +187,7 @@ def _languages(languages: list[dict[str, Any]]) -> str:
         cx = P + (i % 4) * col_w
         cy = 492 + (i // 4) * 26
         legend.append(
-            f'<g class="rise" style="animation-delay:{1.2 + i * 0.06:.2f}s">'
-            f'<circle cx="{cx + 5:.1f}" cy="{cy - 4.5}" r="5" fill="{esc(lang["color"])}"/>'
+            f'<g><circle cx="{cx + 4:.1f}" cy="{cy - 4.5}" r="4" fill="{esc(lang["color"])}"/>'
             f'<text x="{cx + 18:.1f}" y="{cy}" class="lang">{esc(lang["name"])}</text>'
             f'<text x="{cx + col_w - 24:.1f}" y="{cy}" class="pct" text-anchor="end">'
             f'{lang["percentage"]:.1f}%</text></g>'
@@ -237,8 +195,8 @@ def _languages(languages: list[dict[str, Any]]) -> str:
     return f"""
     <text x="{P}" y="436" class="label">LANGUAGES</text>
     <text x="{W - P}" y="436" class="sub" text-anchor="end">by code size, public repos</text>
-    <rect x="{P}" y="452" width="{INNER}" height="10" rx="5" fill="{LINE}"/>
-    <g clip-path="url(#bar)"><g class="grow">{''.join(segments)}</g></g>
+    <rect x="{P}" y="452" width="{INNER}" height="8" rx="4" fill="{LINE}"/>
+    <g clip-path="url(#bar)">{''.join(segments)}</g>
     {''.join(legend)}"""
 
 
@@ -285,16 +243,10 @@ def build_svg(
   <desc id="d">Contributions, streaks, the last twelve months of activity and most used languages.</desc>
   {_defs()}
   {_style()}
-  <g clip-path="url(#card)">
-    <rect width="{W}" height="{H}" fill="{BG}"/>
-    <rect width="{W}" height="{H}" fill="url(#glowA)"/>
-    <rect width="{W}" height="{H}" fill="url(#glowB)"/>
-  </g>
-  <rect x=".75" y=".75" width="{W - 1.5}" height="{H - 1.5}" rx="19.5" fill="none" stroke="url(#ring)" stroke-width="1.5" opacity=".75"/>
+  <rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="16" fill="{BG}" stroke="{LINE}"/>
 
-  <g class="rise">
-    <circle cx="{P + 5}" cy="38" r="5" fill="url(#brand)"/>
-    <text x="{P + 18}" y="43" font-size="15" font-weight="700" fill="{TEXT}">{esc(username)}</text>
+  <g>
+    <text x="{P}" y="43" font-size="15" font-weight="600" fill="{TEXT}">{esc(username)}</text>
     <text x="{W - P}" y="43" class="sub mono" text-anchor="end">github activity</text>
   </g>
   {tiles}

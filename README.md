@@ -3,9 +3,9 @@
 </p>
 
 <p align="center">
-  <a href="https://huseyinium.com"><img src="https://img.shields.io/badge/huseyinium.com-0f141d?style=for-the-badge&logo=googlechrome&logoColor=ff8a3d" alt="Website" /></a>
-  <a href="https://arcyai.com"><img src="https://img.shields.io/badge/ARCY_AI-ec3b21?style=for-the-badge" alt="ARCY AI" /></a>
-  <a href="https://github.com/huseyinium?tab=repositories"><img src="https://img.shields.io/badge/Repositories-0f141d?style=for-the-badge&logo=github&logoColor=d9327c" alt="Repositories" /></a>
+  <a href="https://huseyinkaratas.me">Website</a> &nbsp;·&nbsp;
+  <a href="https://arcyai.com">ARCY AI</a> &nbsp;·&nbsp;
+  <a href="https://github.com/huseyinium?tab=repositories">Repositories</a>
 </p>
 
 ### About
@@ -22,8 +22,7 @@ Before that I shipped small tools I wanted for myself, and I still do.
 | --- | --- | --- |
 | [**ARCY AI**](https://arcyai.com) | An in-product AI agent that answers customers inside the product and shows where they drop off | TypeScript, Next.js, NestJS |
 | [**hushboard**](https://github.com/huseyinium/hushboard) | A macOS menu bar app that mutes your mic while you type in meetings | Swift |
-| [**unREADME**](https://github.com/huseyinium/unREADME) | An npm package that writes a solid README with one command | JavaScript |
-| [**huseyinium.com**](https://huseyinium.com) | My personal site | TypeScript |
+| [**huseyinkaratas.me**](https://huseyinkaratas.me) | My personal site | TypeScript |
 
 ### Tools I reach for
 
